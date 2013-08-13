@@ -1,3 +1,7 @@
+# Binaries 
+*.hex
+*.elf
+
 # Object files
 *.o
 
