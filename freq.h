@@ -1,5 +1,6 @@
+#include "globals.h"
 #include <avr/eeprom.h>
-#define CDIV 857
+
 const float notes[] PROGMEM = {
 	25.9565,
 	27.5000, 29.1352, 30.8677, 32.7032, 34.6478, 36.7081, 38.8909, 41.2034, 43.6535, 46.2493,

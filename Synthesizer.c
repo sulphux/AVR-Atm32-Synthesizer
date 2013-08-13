@@ -14,28 +14,13 @@
 #include <math.h>
 #include <avr/pgmspace.h>
 
+#include "globals.h"
 #include "freq.h"
 #include "screen.h"
 #include "waves.h"
 
 
-#define F_CPU 16000000UL
 
-#define SET_MODE_2
-
-
-#ifdef SET_MODE_1
-#define SAMPLE_RATE 16000.0 // 1)
-#define MODE 1
-#endif
-
-#ifdef SET_MODE_2
-#define SAMPLE_RATE 16000.0 // 2)
-#define MODE 2
-#endif
-
-#define SAMPLE_SIZE 256.0
-#define BUFF_SIZE 1532
 
 float decay = 0.5;
 uint16_t delay_m = 500;
