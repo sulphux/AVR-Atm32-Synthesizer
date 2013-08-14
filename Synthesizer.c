@@ -237,7 +237,7 @@ ISR(TIMER2_COMP_vect)
 	//buffor[buff_ptr] = ((lastsample-128)*0.7+128);
 	//buff_ptr++;
 	if (WaveType < 4)
-		lastsample = pgm_read_float(&waves[WaveType][(int)index])*volume+128;
+		lastsample = pgm_read_float(&waves[WaveType][(int)index])*volume+128; // choose one type of "wave-tables"
 	else 
 		lastsample = 127;
 	index += indexINC;

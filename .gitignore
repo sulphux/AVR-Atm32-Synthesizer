@@ -9,7 +9,7 @@
 *.lib
 *.a
 
-# Shared objects (inc. Windows DLLs)
+# Shared objects 
 *.dll
 *.so
 *.so.*
