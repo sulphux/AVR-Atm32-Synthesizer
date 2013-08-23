@@ -52,15 +52,25 @@ void initUsart()
 	UBRRH = (baud_prescale >> 8);
 	UBRRL = baud_prescale;
     UCSRC = (1 << URSEL)|(1 << UCSZ1)|(1 << UCSZ0);
-    UCSRB = (1 << RXCIE)|(1 << RXEN)|(1 << TXEN);
+    UCSRB |= (1 << RXCIE)|(1 << RXEN);
+    #ifdef DEBUG
+    UCSRB |= (1 << TXEN);
+    #endif
 }
 
 void turnUsartOn()
 {
-	UCSRB = (1 << RXCIE)|(1 << RXEN)|(1 << TXEN);
+    UCSRB = (1 << RXCIE)|(1 << RXEN);
+    #ifdef DEBUG
+    UCSRB |= (1 << TXEN);
+    #endif
 }
 
 void turnUsartOff()
 {
-	UCSRB &= ~((1 << RXCIE)|(1 << RXEN)|(1 << TXEN));
+    #ifdef DEBUG
+    UCSRB &= ~((1 << RXCIE)|(1 << RXEN)|(1 << TXEN));
+    #else
+    UCSRB &= ~((1 << RXCIE)|(1 << RXEN));
+    #endif
 }

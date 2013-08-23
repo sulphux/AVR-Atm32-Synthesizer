@@ -10,6 +10,8 @@
 /// D E F I N E S  ///
 //////////////////////
 
+//#define DEBUG
+
 // default Atmega32 CPU frequency
 #define F_CPU 16000000UL
 

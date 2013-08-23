@@ -52,15 +52,15 @@ volatile uint8_t y;
 volatile uint8_t z;
 volatile uint8_t key;
 
-uint8_t convertKey()
+uint8_t convertKey(void)
 {
-	uint8_t tmp;
+    uint8_t tmp = 0;
 	if (key > 96)
 		tmp = key - 32;
 	return tmp;
 }
 
-volatile void my_delay(long del)
+void my_delay(long del)
 {
 	delay = del;
 	while (delay--);
@@ -86,6 +86,22 @@ void play_note(uint8_t note, uint8_t vol, uint8_t type, uint16_t length)
 	volume = vol;
 	for(len=0;len<length;len++)
 		my_delay(1);
+}
+
+void play_arp(uint8_t note, uint8_t vol, uint8_t type, uint16_t length, uint8_t density)
+{
+    uint16_t len;
+    len = 0;
+
+    while (len < length)
+    {
+        play_note(note, vol, type, density);
+        len+=density;
+        play_note(note+12, vol, type, density);
+        len+=density;
+        play_note(note+24, vol, type, density);
+        len+=density;
+    }
 }
 
 void play_pause(uint16_t length)
@@ -127,6 +143,7 @@ int main(void)
     	if(pressed == 1)
     	{
     		turnUsartOff();
+            PORTC ^= 0x03;
             if (key > 40)
             {
                 uint8_t readedKey = key;
@@ -138,7 +155,7 @@ int main(void)
                 else readedKey = 0;
 
                 turnC2on();
-                play_note(readedKey, 50, 3, 50);
+                play_arp(readedKey, 50, 1, 50, 10);
                 turnC2off();
             }
             pressed = 0;
@@ -254,12 +271,17 @@ ISR(TIMER2_COMP_vect)
 
 ISR(USART_RXC_vect)
 {
-	PORTC ^= 0x03;
-	turnC2off();
+    //turnC2off();
+
     key = UDR;
+
+    // DEBUG
+    #ifdef DEBUG
     UDR = key;
     returnHome();
     printint(key);
     sendText("  ");
+    #endif
+
     pressed = 1;
 }
