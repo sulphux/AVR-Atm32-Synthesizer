@@ -5,6 +5,8 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#define _PORT_ PORTA
+#define _DDR_ DDRA
 
 
 void sendText(char *x);
@@ -19,18 +21,18 @@ void sendHi(uint8_t x);
 
 void sendLo(uint8_t x);
 
-void ScreenOn();
+void screenOn();
 
-void SetCoursorOnFirstRow();
+void setCoursorOnFirstRow();
 
-void SetCoursorOnSecondRow();
+void setCoursorOnSecondRow();
 
-void ClearDisplay();
+void clearDisplay();
 
-void ReturnHome();
+void returnHome();
 
 void printint( unsigned short int x);
 
-void InitScreen();
+void initScreen();
 
 #endif // SCREEN

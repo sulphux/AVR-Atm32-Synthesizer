@@ -1,5 +1,6 @@
 #include "screen.h"
 
+
 void sendText(char *x){
 	while(*x != '\0'){
 		sendData(*x);
@@ -8,12 +9,12 @@ void sendText(char *x){
 }
 
 void sendCommand(uint8_t x){
-	PORTA  &= ~RS;
+	_PORT_  &= ~RS;
 	sendByte(x);
 }
 
 void sendData(uint8_t x){
-	PORTA |= RS;
+	_PORT_ |= RS;
 	sendByte(x);
 }
 
@@ -24,39 +25,40 @@ void sendByte(uint8_t x){
 }
 
 void sendHi(uint8_t x){
-	PORTA |= E;
-	PORTA = (PORTA&(RS|UNUSED)) | E | (x & 0xF0);
-	PORTA &= ~E;
+	_PORT_ |= E;
+	_PORT_ = (_PORT_&(RS|UNUSED)) | E | (x & 0xF0);
+	_PORT_ &= ~E;
 }
 
 void sendLo(uint8_t x){
-	PORTA |= E;
-	PORTA = (PORTA&(RS|UNUSED)) | E | (x<<4 & 0xF0);
-	PORTA &= ~E;
+	_PORT_ |= E;
+	_PORT_ = (_PORT_&(RS|UNUSED)) | E | (x<<4 & 0xF0);
+	_PORT_ &= ~E;
 }
 
-void ScreenOn()
+void screenOn()
 {
 	sendCommand(0x0F);
 }
 
-void SetCoursorOnFirstRow()
+void setCoursorOnFirstRow()
 {
-	sendCommand(0x80); 
+	sendCommand(0b10000000); 
 }
 
-void SetCoursorOnSecondRow()
+void setCoursorOnSecondRow()
 {
-	sendCommand(0xA9);
+	sendCommand(0b11000000);
 }
 
-void ClearDisplay()
+void clearDisplay()
 {
 	sendCommand(0x01);
 }
 
-void ReturnHome()
+void returnHome()
 {
+	_delay_ms(1);
 	sendCommand(0x02);
 }
 
@@ -81,12 +83,12 @@ void printint( unsigned short int x)
 	}
 }
 
-void InitScreen()
+void initScreen()
 {
-	DDRA = 0xFF;
+	_DDR_ = 0xFF;
 	_delay_ms(50);
 	int i;
-	PORTA = ~RS;
+	_PORT_ = ~RS;
 	for(i=0;i<3;i++){
 		sendLo(0x03);
 		_delay_ms(5);
@@ -100,6 +102,6 @@ void InitScreen()
 	sendCommand(0x06);
 	_delay_ms(50);
 
-	ScreenOn();
-	SetCoursorOnFirstRow();
+	screenOn();
+	setCoursorOnFirstRow();
 }
