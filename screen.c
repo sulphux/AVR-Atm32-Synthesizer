@@ -105,3 +105,22 @@ void initScreen()
 	screenOn();
 	setCoursorOnFirstRow();
 }
+
+void generateCharacter(uint8_t newChar[], uint8_t cgAddress)
+{
+	sendCommand(0x40 + cgAddress*8);
+	sendData(newChar[0]);
+	sendData(newChar[1]);
+	sendData(newChar[2]);
+	sendData(newChar[3]);
+	sendData(newChar[4]);
+	sendData(newChar[5]);
+	sendData(newChar[6]);
+	sendData(newChar[7]);
+	sendCommand(0x80);
+}
+
+void putChar(char c)
+{
+	sendData(c);
+}

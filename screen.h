@@ -35,4 +35,8 @@ void printint( unsigned short int x);
 
 void initScreen();
 
+void generateCharacter(uint8_t newChar[], uint8_t cgAddress);
+
+void putChar(char c);
+
 #endif // SCREEN
