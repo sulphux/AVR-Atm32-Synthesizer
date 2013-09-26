@@ -20,11 +20,62 @@
 #include "waves.h"
 #include "initial_functions.h"
 
+/****** MENU ************/
+const uint8_t customChars[8][8] PROGMEM = {
+        {0x11,0x1b,0x1b,0x0e,0x0e,0x0e,0x04,0x04},
+        {0x04,0x04,0x0e,0x0e,0x0e,0x1b,0x1b,0x11},
+        {0x03,0x06,0x0e,0x1c,0x1c,0x0e,0x06,0x03},
+        {0x18,0x0c,0x0e,0x07,0x07,0x0e,0x0c,0x18},
+        {0xe,0x4,0x4,0x11,0x11,0x1b,0x1b,0x1b},
+        {0x1b,0x1b,0x11,0x11,0x11,0x4,0x4,0xe},
+        {0x1c,0x19,0x11,0x3,0x3,0x11,0x19,0x1c},
+        {0x7,0x13,0x11,0x18,0x18,0x11,0x13,0x7}
+    };
+
+
+static const char * menuStrings[] =
+{
+    "Volume",
+    "Velocity"
+};
+
+void generateCharacters()
+{
+    uint8_t char_i;
+    uint8_t segment;
+    for(char_i=0; char_i<8; char_i++)
+    {
+        sendCommand(0x40 + (char_i<<3));
+        for(segment=0; segment<8; segment++)
+            sendData(pgm_read_byte(&customChars[char_i][segment]));
+        sendCommand(0x80);
+    }
+}
+
+void printMenuView(const char* view, int val)
+{
+    sendCommand(0x01);
+    setCoursorOnFirstRow();
+    putChar(2);
+    sendText(view);
+    putChar(3);
+    setCoursorOnSecondRow();
+    putChar(1);
+    printint(val);
+    putChar(0);
+}
+
+/************************/
+
 
 const float freqTL PROGMEM = SAMPLE_SIZE/SAMPLE_RATE;
 
 volatile bool pressed = false;
 volatile bool generating = false;
+volatile bool options = false;
+
+volatile uint8_t menuIndex = 0;
+volatile uint8_t valChanged = 0;
 
 volatile float decay = 0.5;
 volatile uint16_t delay_m = 500;
@@ -51,6 +102,8 @@ volatile uint8_t x;
 volatile uint8_t y;
 volatile uint8_t z;
 volatile uint8_t key;
+volatile uint8_t key2;
+volatile uint8_t key3;
 
 uint8_t convertKey(void)
 {
@@ -121,7 +174,9 @@ int main(void)
 	initScreen();
 	initPWM();
 	initCounter2();
-	initUsart();
+    initUsart();
+    generateCharacters(); // generating custom characters for lcd display
+    sendCommand(0x0C); // coursor OFF , blink 0FF,  only display
 	_delay_ms(50);
 
 	DDRD = 0x03;
@@ -135,6 +190,8 @@ int main(void)
 	
 	volume = 127;
 
+    printMenuView("Volume", volume);
+
 	//indexINC = pgm_read_float(&freqTL) * pgm_read_byte(&notes[note]);
 	sei();
 	unsigned int test_speed = 100;
@@ -144,20 +201,55 @@ int main(void)
     	{
     		turnUsartOff();
             PORTC ^= 0x03;
-            if (key > 40)
+            if (options == 0)
             {
-                uint8_t readedKey = key;
-                key = 0;
-                if (readedKey > 96) readedKey -= 32;
-                readedKey -= 40;
+                if (key > 40)
+                {
+                    uint8_t readedKey = key;
+                    key = 0;
+                    if (readedKey > 96) readedKey -= 32;
+                    readedKey -= 40;
 
-                if (readedKey >= 0 && readedKey < 60) readedKey = pgm_read_byte(&key_map[readedKey]);
-                else readedKey = 0;
+                    if (readedKey >= 0 && readedKey < 60) readedKey = pgm_read_byte(&key_map[readedKey]);
+                    else readedKey = 0;
 
-                turnC2on();
-                play_arp(readedKey, 50, 1, 50, 10);
-                turnC2off();
+                    turnC2on();
+                    play_arp(readedKey, 50, 1, 50, 10);
+                    turnC2off();
+                }else if (key == 32)
+                {
+                    options ^= 1;
+                }
+            }else
+            {
+                switch (key3)
+                {
+                    case 32:
+                        options ^= 1;
+                    break;
+                    case 65: // UP
+                        valChanged = 1;
+                    break;
+                    case 66: // DOWN
+                        valChanged = -1;
+                    break;
+                    case 67: // RIGHT
+                         menuIndex++;
+                    break;
+                    case 68: // LEFT
+                         menuIndex--;
+                    break;
+                }
+                printMenuView(menuStrings[menuIndex], menuIndex);
+                printint(key3);
+                sendText(" ");
+                printint(menuIndex);
             }
+            //65 up
+            //66 down
+            //67 right
+            //68 left
+
             pressed = 0;
             turnUsartOn();
     	}else
@@ -274,6 +366,8 @@ ISR(USART_RXC_vect)
     //turnC2off();
 
     key = UDR;
+    key2 = UDR;
+    key3 = UDR;
 
     // DEBUG
     #ifdef DEBUG
@@ -285,3 +379,5 @@ ISR(USART_RXC_vect)
 
     pressed = 1;
 }
+
+
